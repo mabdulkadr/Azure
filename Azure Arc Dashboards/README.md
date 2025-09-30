@@ -50,7 +50,7 @@ The dashboards are designed to help IT administrators monitor and manage **hybri
 5. Optionally, click **Share** to publish it for your team.
 
 📸 Example: Uploading a dashboard in the Azure Portal  
-![Upload Dashboard](Arc - Unified Server Inventory.png)
+![Upload Dashboard](./Arc - Unified Server Inventory.png)
 
 ---
 
