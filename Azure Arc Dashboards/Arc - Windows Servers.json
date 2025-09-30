@@ -1,0 +1,578 @@
+{
+  "properties": {
+    "lenses": [
+      {
+        "order": 0,
+        "parts": [
+          {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "colSpan": 21,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "partTitle",
+                  "value": "Azure-Arc-Overview",
+                  "isOptional": true
+                },
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "value": true,
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": " resources\r\n| where type =~ \"microsoft.hybridcompute/machines\"\r\n| where properties.osType =~ 'windows'\r\n| extend osSku = properties.osSku\r\n| extend osName = properties.osName\r\n| extend operatingSystem = iif(isnotnull(osSku), osSku, osName)\r\n| extend agentversion = properties.agentVersion\r\n| extend status = properties.status\r\n\t| join kind = leftouter (\r\n\t\tresources\r\n\t\t\t| where type =~ \"microsoft.hybridcompute/machines\"\r\n\t\t\t| where properties.osType =~ 'windows'\r\n\t\t\t| mv-expand allnics= parse_json(properties.networkProfile.networkInterfaces)\r\n\t\t\t| mv-expand allips = allnics.ipAddresses\r\n\t\t\t| extend ipAddressVersion = tostring(allips.ipAddressVersion)\r\n\t\t\t| extend ipAddress = allips.address\r\n\t\t\t| project  id, ipAddress, ipAddressVersion\r\n\t\t\t| where  ipAddressVersion =~ \"IPv4\"\r\n\t\t\t| summarize ipAddressIPv4 = make_set(ipAddress) by id\r\n\t\t) on id\r\n| project MachineName=name,id,status,ipAddressIPv4, agentversion,operatingSystem, location, resourceGroup, subscriptionId\r\n| sort by (tolower(tostring(MachineName))) asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Windows Azure Arc Overview",
+                "subtitle": "Overview of the Arc agents installed and current status."
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 0,
+              "y": 6,
+              "colSpan": 11,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "partTitle",
+                  "value": "Arc-Agent-Version",
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "chartType",
+                  "value": 1,
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": " resources\r\n| where type =~ \"microsoft.hybridcompute/machines\"\r\n| where properties.osType =~ 'windows'\r\n| summarize count() by tostring(properties.agentVersion)\r\n| order by properties_agentVersion desc ",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryChartTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Azure Arc Agent Version Count",
+                "subtitle": "A view and count of the Arc agent versions currently installed."
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 11,
+              "y": 6,
+              "colSpan": 10,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "partTitle",
+                  "value": "Count Operating Systems Arc",
+                  "isOptional": true
+                },
+                {
+                  "name": "chartType",
+                  "value": 2,
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": " resources\r\n| where type =~ \"microsoft.hybridcompute/machines\"\r\n| where properties.osType =~ 'windows'\r\n| extend osSku = properties.osSku\r\n| project name, osSku\r\n| summarize count() by tostring(osSku)\r\n| order by tostring(osSku) asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryChartTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Operating System Count",
+                "subtitle": "A count of the operating systems with an Arc agent installed."
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 0,
+              "y": 12,
+              "colSpan": 9,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "partTitle",
+                  "value": "Query 1",
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": "resources\r\n| where type =~ \"microsoft.hybridcompute/licenses\"\r\n| extend sku = tostring(properties.licenseDetails.edition)\r\n| extend totalCores = tostring(properties.licenseDetails.processors)\r\n| extend state = tostring(properties.licenseDetails.state)\r\n| extend type = tostring(properties.licenseDetails.type)\r\n| extend coreType = case(\r\n   type =~ \"vCore\", \"Virtual Cores\",\r\n   type =~ \"pCore\", \"Physical Cores\",\r\n   \"Unknown\"  )\r\n| project id, sku, coreType, totalCores, state",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "value": true,
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Win ESU License Utilization",
+                "subtitle": ""
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 9,
+              "y": 12,
+              "colSpan": 12,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "partTitle",
+                  "value": "Windows ESU Assignment Status",
+                  "isOptional": true
+                },
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "value": true,
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": "resources\r\n| where type=~ 'microsoft.hybridcompute/machines'\r\n| where properties.osType =~ 'windows'\r\n| extend esuEligibility = properties.licenseProfile.esuProfile.esuEligibility\r\n| where esuEligibility=~ 'Eligible'\r\n| extend licenseAssignmentState = properties.licenseProfile.esuProfile.licenseAssignmentState\r\n| extend serverType = properties.licenseProfile.esuProfile.serverType\r\n| extend osSku = properties.osSku\r\n| extend CoreCount = toint (properties.detectedProperties.logicalCoreCount)\r\n| project MachineName=name,id, CoreCount, osSku, serverType, licenseAssignmentState\r\n| sort by (tolower(tostring(MachineName))) asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Windows ESU Assignment Status",
+                "subtitle": "Overview of current Windows server and their ESU assignment status."
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 0,
+              "y": 18,
+              "colSpan": 10,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "partTitle",
+                  "value": "Query 1",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": "// Run query to see results.\r\nresources\r\n| where type =~ \"microsoft.hybridcompute/machines\"\r\n| where properties.osType =~ 'windows'\r\n| extend status = properties.status\r\n| extend operatingSystem = properties.osSku\r\n| extend coreCount = properties.detectedProperties.coreCount \r\n| extend logicalCoreCount = properties.detectedProperties.logicalCoreCount \r\n| extend licenseProfile = properties.licenseProfile\r\n| extend isVirtual = iff(properties.detectedProperties.model contains \"virtual\" or properties.detectedProperties.manufacturer in (\"VMware, Inc.\",\"Nutanix\",\"Alibaba Cloud\",\"Xen\")  or properties.cloudMetadata.provider in ( \"AWS\",\"GCP\"), \"Virtual\", \"Physical\")\r\n| extend SysManufacturer = tostring(properties.detectedProperties.manufacturer)    \r\n| extend licenseStatus = tostring(licenseProfile.licenseStatus)\r\n| extend licenseChannel = tostring(licenseProfile.licenseChannel)\r\n| extend productSubscriptionStatus = tostring(licenseProfile.productProfile.subscriptionStatus)\r\n| extend softwareAssurance = licenseProfile.softwareAssurance\r\n| extend softwareAssuranceCustomer = licenseProfile.softwareAssurance.softwareAssuranceCustomer\r\n| extend benefitsStatus = case(\r\n    softwareAssuranceCustomer == true, \"Activated\",\r\n    (licenseStatus =~ \"Licensed\" and licenseChannel =~ \"PGS:TB\") or productSubscriptionStatus =~ \"Enabled\", \"Activated via Pay-as-you-go\",\r\n    isnull(softwareAssurance) or isnull(softwareAssuranceCustomer) or softwareAssuranceCustomer == false, \"Not activated\",\r\n    \"Not activated\")\r\n| project name, status, benefitsStatus,coreCount,logicalCoreCount, licenseStatus, licenseChannel , resourceGroup, subscriptionId, operatingSystem, id, type, location, kind,isVirtual,SysManufacturer\r\n| where not((type =~ ('microsoft.sql/servers')) and ((kind =~ ('v12.0,analytics'))))\r\n| where not((type =~ ('microsoft.sql/servers/databases')) and ((kind in~ ('system','v2.0,system','v12.0,system','v12.0,system,serverless','v12.0,user,datawarehouse,gen2,analytics'))))\r\n| where (type in~ ('Microsoft.HybridCompute/machinesSoftwareAssurance','Microsoft.HybridCompute/machines'))\r\n| project name,benefitsStatus,status,resourceGroup,coreCount,logicalCoreCount,operatingSystem,id,type,kind,location,subscriptionId, licenseStatus, licenseChannel,isVirtual,SysManufacturer\r\n| where  benefitsStatus  =~ 'Activated'\r\n| summarize ServersActivated=count(), ServersCores=sum(toint(logicalCoreCount)) by tostring(operatingSystem),isVirtual\r\n| order by tostring(operatingSystem) asc , isVirtual asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Windows Benefits Activated",
+                "subtitle": ""
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 10,
+              "y": 18,
+              "colSpan": 11,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "partTitle",
+                  "value": "Query 1",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": "// Run query to see results.\r\nresources\r\n| where type =~ \"microsoft.hybridcompute/machines\"\r\n| where properties.osType =~ 'windows'\r\n| extend operatingSystem = properties.osSku\r\n| extend logicalCoreCount = properties.detectedProperties.logicalCoreCount \r\n| extend isVirtual = iff(properties.detectedProperties.model contains \"virtual\" or properties.detectedProperties.manufacturer in (\"VMware, Inc.\",\"Nutanix\",\"Alibaba Cloud\",\"Xen\")  or properties.cloudMetadata.provider in ( \"AWS\",\"GCP\"), \"Virtual\", \"Physical\")\r\n| summarize ArcServers=count(), ServersCores=sum(toint(logicalCoreCount)) by tostring(operatingSystem),isVirtual\r\n| sort by tostring(operatingSystem) asc , isVirtual asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Windows Machines Connected by ARC",
+                "subtitle": ""
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 0,
+              "y": 24,
+              "colSpan": 21,
+              "rowSpan": 7
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "partTitle",
+                  "value": "Query 1",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "value": true,
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": "// Run query to see results.\r\nresources\r\n| where type =~ \"microsoft.hybridcompute/machines\"\r\n| where properties.osType =~ 'windows'\r\n| extend status = properties.status\r\n| extend operatingSystem = properties.osSku\r\n| extend coreCount = properties.detectedProperties.coreCount \r\n| extend logicalCoreCount = properties.detectedProperties.logicalCoreCount \r\n| extend licenseProfile = properties.licenseProfile\r\n| extend licenseStatus = tostring(licenseProfile.licenseStatus)\r\n| extend licenseChannel = tostring(licenseProfile.licenseChannel)\r\n| extend productSubscriptionStatus = tostring(licenseProfile.productProfile.subscriptionStatus)\r\n| extend softwareAssurance = licenseProfile.softwareAssurance\r\n| extend softwareAssuranceCustomer = licenseProfile.softwareAssurance.softwareAssuranceCustomer\r\n| extend benefitsStatus = case(\r\n    softwareAssuranceCustomer == true, \"Activated\",\r\n    (licenseStatus =~ \"Licensed\" and licenseChannel =~ \"PGS:TB\") or productSubscriptionStatus =~ \"Enabled\", \"Activated via Pay-as-you-go\",\r\n    isnull(softwareAssurance) or isnull(softwareAssuranceCustomer) or softwareAssuranceCustomer == false, \"Not activated\",\r\n    \"Not activated\")\r\n| project name, status, benefitsStatus,coreCount,logicalCoreCount, licenseStatus, licenseChannel , resourceGroup, subscriptionId, operatingSystem, id, type, location, kind, tags\r\n| where not((type =~ ('microsoft.sql/servers')) and ((kind =~ ('v12.0,analytics'))))\r\n| where not((type =~ ('microsoft.sql/servers/databases')) and ((kind in~ ('system','v2.0,system','v12.0,system','v12.0,system,serverless','v12.0,user,datawarehouse,gen2,analytics'))))\r\n| where (type in~ ('Microsoft.HybridCompute/machinesSoftwareAssurance','Microsoft.HybridCompute/machines'))\r\n| project MachineName=name,id, benefitsStatus, status, operatingSystem, coreCount,logicalCoreCount,type,location, licenseStatus, licenseChannel,subscriptionId ,resourceGroup\r\n//| where  benefitsStatus  =~ 'Activated'\r\n| sort by (tolower(tostring(MachineName))) asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Windows Benefits and License Type",
+                "subtitle": ""
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 0,
+              "y": 31,
+              "colSpan": 21,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "partTitle",
+                  "value": "Query 1",
+                  "isOptional": true
+                },
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "value": true,
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": "// Run query to see results.\r\nresources\r\n| where type =~ 'microsoft.hybridcompute/machines' \r\n| where properties.osType =~ 'windows'\r\n| extend machineId = tolower(tostring(id))\r\n| extend hostId = tolower(id)\r\n| extend datacenter = iif(isnull(tags.Datacenter), '', tags.Datacenter)\r\n| extend status = properties.status\r\n| extend osSku = properties.osSku\r\n| extend osName = properties.osName\r\n| extend operatingSystem = iif(isnotnull(osSku), osSku, osName)\r\n| where  operatingSystem contains \"Server\"\r\n| extend extensionsEnabled = tostring(properties.agentConfiguration.extensionsEnabled)\r\n| extend licenseProfile = properties.licenseProfile\r\n| extend licenseStatus = tostring(licenseProfile.licenseStatus)\r\n| extend licenseChannel = tostring(licenseProfile.licenseChannel)\r\n| extend productSubscriptionStatus = tostring(licenseProfile.productProfile.subscriptionStatus)\r\n| extend softwareAssurance = licenseProfile.softwareAssurance\r\n| extend softwareAssuranceCustomer = licenseProfile.softwareAssurance.softwareAssuranceCustomer\r\n\t| join kind=leftouter (\r\n\t\tresources\r\n\t\t\t| where type =~ \"microsoft.hybridcompute/machines/extensions\"\r\n\t\t\t| extend machineId = tolower(tostring(trim_end(@\"\\/\\w+\\/(\\w|\\.)+\", id)))\r\n\t\t\t| extend provisioned = tolower(tostring(properties.provisioningState)) == \"succeeded\"\r\n\t\t\t| summarize\r\n\t\t\t\tMDEcnt = countif(properties.type in (\"MDE.Linux\", \"MDE.Windows\") and provisioned),\r\n\t\t\t\tAMAcnt = countif(properties.type in (\"AzureMonitorWindowsAgent\", \"AzureMonitorLinuxAgent\") and provisioned),\r\n\t\t\t\tWACcnt = countif(properties.type in (\"AdminCenter\") and provisioned),\r\n\t\t\t\tUMcnt = countif(properties.type in (\"WindowsOsUpdateExtension\",\"LinuxOsUpdateExtension\", \"WindowsPatchExtension\") and provisioned) by machineId\r\n\t\t) on machineId\r\n\t| join kind = leftouter (\r\n\t\tresources\r\n\t\t\t| where type =~ \"microsoft.hybridcompute/machines\"\r\n\t\t\t| where properties.osType =~ 'windows'\r\n\t\t\t| mv-expand allnics= parse_json(properties.networkProfile.networkInterfaces)\r\n\t\t\t| mv-expand allips = allnics.ipAddresses\r\n\t\t\t| extend ipAddressVersion = tostring(allips.ipAddressVersion)\r\n\t\t\t| extend ipAddress = allips.address\r\n\t\t\t| project  id, ipAddress, ipAddressVersion\r\n\t\t\t| where  ipAddressVersion =~ \"IPv4\"\r\n\t\t\t| summarize ipAddressIPv4 = make_set(ipAddress) by id\r\n\t\t) on id\r\n| extend defenderStatus = iff ((MDEcnt>0), 'Enabled', 'Not enabled')\r\n| extend monitoringAgent = iff ((AMAcnt>0), 'Installed','Not installed')\r\n| extend wacStatus = iff ((WACcnt>0), 'Enabled', 'Not enabled')\r\n| extend updateManagement = iff ((UMcnt>0), 'Enabled', 'Not enabled')\r\n| extend hostName = tostring(properties.displayName)\r\n| extend name = iif(properties.cloudMetadata.provider == 'AWS' and name != hostName, strcat(name, \"(\", hostName, \")\"), name)\r\n| project MachineName=name,id,ipAddressIPv4, status, operatingSystem, extensionsEnabled, defenderStatus, monitoringAgent, wacStatus, updateManagement, resourceGroup\r\n| sort by (tolower(tostring(MachineName))) asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Windows Servers Azure Arc Extension Status",
+                "subtitle": "Overview if extensions are allowed to be deployed to Azure Arc agents and if they are enabled/installed."
+              }
+            }
+          },
+          {
+            "position": {
+              "x": 0,
+              "y": 37,
+              "colSpan": 21,
+              "rowSpan": 6
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "chartType",
+                  "isOptional": true
+                },
+                {
+                  "name": "isShared",
+                  "isOptional": true
+                },
+                {
+                  "name": "queryId",
+                  "isOptional": true
+                },
+                {
+                  "name": "partTitle",
+                  "value": "Query 1",
+                  "isOptional": true
+                },
+                {
+                  "name": "formatResults",
+                  "value": true,
+                  "isOptional": true
+                },
+                {
+                  "name": "queryScope",
+                  "value": {
+                    "scope": 0,
+                    "values": []
+                  },
+                  "isOptional": true
+                },
+                {
+                  "name": "query",
+                  "value": "resources\r\n| where type =~ \"microsoft.hybridcompute/machines\"\r\n| where properties.osType =~ 'windows'\r\n| extend status = tostring(properties.status)\r\n| extend operatingSystem = tostring(properties.osSku)\r\n| extend isVirtual = iff(properties.detectedProperties.model contains \"virtual\" or properties.detectedProperties.manufacturer in (\"VMware, Inc.\",\"Nutanix\",\"Alibaba Cloud\",\"Xen\")  or properties.cloudMetadata.provider in ( \"AWS\",\"GCP\"), \"Virtual\", \"Physical\")\r\n| extend SysManufacturer = tostring(properties.detectedProperties.manufacturer)\r\n| project id, JoinID = toupper(id), status,operatingSystem, isVirtual, SysManufacturer\r\n| join kind=leftouter(\r\n  resources\r\n  | where type =~ 'microsoft.hybridcompute/machines/extensions'\r\n  | extend provisioningState =  tostring(properties.provisioningState)\r\n  | extend ExtVersion =tostring(properties.typeHandlerVersion)\r\n  | project MachineId = toupper(substring(id, 0, indexof(id, '/extensions'))),  ExtensionName =strcat(name, \" : \", provisioningState,\" : \", ExtVersion)\r\n) on $left.JoinID == $right.MachineId\r\n| join kind = leftouter (\r\n    resources\r\n    | where type =~ \"microsoft.hybridcompute/machines\"\r\n    | where properties.osType =~ 'windows'\r\n    | mv-expand allnics= parse_json(properties.networkProfile.networkInterfaces)\r\n    | mv-expand allips = allnics.ipAddresses\r\n    | extend ipAddressVersion = tostring(allips.ipAddressVersion)\r\n    | extend ipAddress = allips.address\r\n    | project  id, ipAddress, ipAddressVersion\r\n    | where  ipAddressVersion =~ \"IPv4\"\r\n    | summarize ipAddressIPv4 = make_set(ipAddress) by id\r\n    ) on id\r\n| summarize Extensions = make_set(ExtensionName) by id,tostring(ipAddressIPv4),status, operatingSystem, isVirtual,SysManufacturer\r\n//| where Extensions  contains \"sql\"\r\n//| where status  in ( \"Connected\",\"\" )\r\n//| where Extensions contains \"Failed\"\r\n| order by tolower(id) asc",
+                  "isOptional": true
+                }
+              ],
+              "type": "Extension/HubsExtension/PartType/ArgQueryGridTile",
+              "settings": {},
+              "partHeader": {
+                "title": "Extensions deployed by server",
+                "subtitle": ""
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "model": {
+        "timeRange": {
+          "value": {
+            "relative": {
+              "duration": 24,
+              "timeUnit": 1
+            }
+          },
+          "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+        },
+        "filterLocale": {
+          "value": "en-us"
+        },
+        "filters": {
+          "value": {
+            "MsPortalFx_TimeRange": {
+              "model": {
+                "format": "utc",
+                "granularity": "auto",
+                "relative": "24h"
+              },
+              "displayCache": {
+                "name": "UTC Time",
+                "value": "Past 24 hours"
+              },
+              "filteredPartIds": []
+            }
+          }
+        }
+      }
+    }
+  },
+  "name": "Arc - Windows Servers",
+  "type": "Microsoft.Portal/dashboards",
+  "location": "INSERT LOCATION",
+  "tags": {
+    "hidden-title": "Arc - Windows Servers"
+  },
+  "apiVersion": "2022-12-01-preview"
+}
